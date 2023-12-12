@@ -1,0 +1,40 @@
+{
+  "name": "daisy_1",
+  "version": "1.0.0",
+  "description": "Atlan backend challenge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VDliveson/Atlan-assignment.git"
+  },
+  "keywords": [
+    "nodejs"
+  ],
+  "author": "vd",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VDliveson/Atlan-assignment/issues"
+  },
+  "homepage": "https://github.com/VDliveson/Atlan-assignment#readme",
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "celery-node": "^0.5.9",
+    "dotenv": "^16.3.1",
+    "elastic-apm-node": "^4.3.0",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.0.2",
+    "swagger": "^0.7.5",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
+  }
+}
