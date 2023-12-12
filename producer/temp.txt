@@ -1,1 +1,0 @@
-npm i dotenv express-session bcrypt body-parser express jsonwebtoken mongoose morgan multer nodemon swagger swagger-jsdoc swagger-ui-express
