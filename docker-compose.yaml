@@ -1,0 +1,25 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - services_network
+
+  producer:
+    build:
+      context: ./producer  # Adjust the context to point to the 'producer' directory
+      dockerfile: Dockerfile  # Specify the name of your Dockerfile
+    networks:
+      - services_network
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ=amqp://rabbitmq:5672
+    ports:
+      - "3009:3009"  # Expose port 3000 for API calls
+networks:
+  services_network:
+    driver: bridge

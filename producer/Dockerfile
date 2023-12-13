@@ -1,24 +1,19 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18.16.0-alpine
+FROM node:18.16-alpine
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json to the container
+# Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Install app dependencies
+# Install application dependencies
 RUN npm install
 
-# Bundle app source
+# Copy the application code into the container
 COPY . .
 
 # Expose the port the app runs on
-EXPOSE 3010
+EXPOSE 3000
 
-# Define environment variables
-ENV MONGO_ATLAS_PW='A4sFBBa26o09FB8E'
-ENV PORT=3010
-
-# Wait for MongoDB to be ready before starting the application
-CMD ["./wait-for-mongo.sh", "npm", "start"]
+# Define the command to run your application
+CMD ["node", "server.js"]

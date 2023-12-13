@@ -15,7 +15,7 @@ var exchange = "daisy1";
 async function connectQueue() {
   try{
   connection = await amqp.connect(
-    process.env.RABBITMQ,
+    process.env.RABBITMQ || "amqp://localhost:5672",
     (err, connection) => {
       if (err){
         console.log("Error connecting");
@@ -49,8 +49,8 @@ async function connectQueue() {
 
   } catch (err){
     console.log(err);
-    setTimeout(() => {
-      console.log("Retrying connection in 10 seconds...");
+    console.log("Retrying connection in 10 seconds...");
+    setTimeout(() => {      
       connectQueue(); // Retry after 10 seconds
     }, 10000);     
   }
