@@ -83,7 +83,6 @@ def insert_response(form, response, answers_array):
 
 def add_data_to_sheet(form, answers):
     try:
-        print(form,answers)
         values = []
         for value in answers:
             values.append(value['answer_text'])

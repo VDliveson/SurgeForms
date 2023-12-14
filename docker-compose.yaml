@@ -20,6 +20,19 @@ services:
       - RABBITMQ=amqp://rabbitmq:5672
     ports:
       - "3009:3009"  # Expose port 3000 for API calls
+
+  sheets-service:
+    build:
+      context: ./google-sheets-service  # Adjust the context to point to the 'google-sheets-service' directory
+      dockerfile: Dockerfile  # Specify the name of your Dockerfile
+    networks:
+      - services_network
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    # Add other configurations for your Python service
+
 networks:
   services_network:
     driver: bridge
