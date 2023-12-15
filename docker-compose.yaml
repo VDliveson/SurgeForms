@@ -1,4 +1,5 @@
 version: '3'
+
 services:
   rabbitmq:
     image: rabbitmq:3.9-management
@@ -8,10 +9,41 @@ services:
     networks:
       - services_network
 
-  producer:
+  producer1:
+    container_name: atlan-producer1
     build:
-      context: ./producer  # Adjust the context to point to the 'producer' directory
-      dockerfile: Dockerfile  # Specify the name of your Dockerfile
+      context: ./producer
+      dockerfile: Dockerfile
+    networks:
+      - services_network
+    depends_on:
+      - rabbitmq
+    environment:
+      - PORT=3000  # Use the same port for both producer instances
+      - RABBITMQ=amqp://rabbitmq:5672
+    ports:
+      - '3000:3000'  # Map container port 3000 to host port 3000
+
+  producer2:
+    container_name: atlan-producer2
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    networks:
+      - services_network
+    depends_on:
+      - rabbitmq
+    environment:
+      - PORT=3000  # Use the same port for both producer instances
+      - RABBITMQ=amqp://rabbitmq:5672
+    ports:
+      - '3001:3000'  # Map container port 3000 to host port 3001
+
+  sheets-service:
+    container_name: atlan-sheets-service
+    build:
+      context: ./google-sheets-service
+      dockerfile: Dockerfile
     networks:
       - services_network
     depends_on:
@@ -19,19 +51,18 @@ services:
     environment:
       - RABBITMQ=amqp://rabbitmq:5672
     ports:
-      - "3009:3009"  # Expose port 3000 for API calls
+      - '3002:3002'  # Map container port 3002 to host port 3002
 
-  sheets-service:
-    build:
-      context: ./google-sheets-service  # Adjust the context to point to the 'google-sheets-service' directory
-      dockerfile: Dockerfile  # Specify the name of your Dockerfile
+  nginx:
+    container_name: atlan-nginx
+    build: ./nginx
+    ports:
+      - '80:80'
     networks:
       - services_network
     depends_on:
-      - rabbitmq
-    environment:
-      - RABBITMQ_HOST=rabbitmq
-    # Add other configurations for your Python service
+      - producer1
+      - producer2
 
 networks:
   services_network:

@@ -8,19 +8,18 @@ from service.sheets import process_data
 
 load_dotenv()
 
-RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
 service_id = "sheets"
 exchange = "daisy1"
 messages = []
 mongo_client = None
-host = os.getenv("RABBITMQ_HOST") or "localhost"
+RABBITMQ = os.getenv("RABBITMQ") or "amqp://localhost:5672"
 
 def connect_queue():
     connected = False
     while not connected:
         try:
             connection = pika.BlockingConnection(
-                pika.ConnectionParameters(host=host, port=RABBITMQ_PORT)
+                pika.URLParameters(RABBITMQ)
             )
             channel = connection.channel()
 
@@ -29,7 +28,7 @@ def connect_queue():
             )
             print(f"Connected to RabbitMQ exchange {exchange}")
 
-            queue = "sms_queue"
+            queue = "sheets_queue"
             channel.queue_declare(queue=queue, durable=True)
             channel.queue_bind(exchange=exchange, queue=queue, routing_key=service_id)
 

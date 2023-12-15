@@ -65,15 +65,19 @@ def insert_response(form, response, answers_array):
     try:        
         answers = []
         for answer in answers_array:
-            res = {
-                "response": ObjectId(response),
-                "form": ObjectId(form),
-                "question": ObjectId(answer["question_id"]), 
-                "text": answer["answer_text"],
-                "createdAt": datetime.today().replace(microsecond=0)
-            }
-            answers.append(res)
-        db.responses.insert_many(answers)
+            temp = {
+                "question":ObjectId(answer["question_id"]),
+                "answer_text": answer["answer_text"]
+            }        
+            answers.append(temp)  
+        
+        res = {
+            "response": ObjectId(response),
+            "form": ObjectId(form),
+            "answers": answers,
+            "createdAt": datetime.today().replace(microsecond=0)
+        }   
+        db.responses.insert_one(res)
         print("Answers inserted successfully into the database")
 
     except Exception as e:
@@ -114,7 +118,7 @@ def add_data_to_sheet(form, answers):
 
 def get_form_sheet(form_id):
     try:
-        existing_entry = db.sheets.find_one({'form': form_id})
+        existing_entry = db.sheets.find_one({'form': ObjectId(form_id)})
         if existing_entry:
             print("Sheet entry already exists in MongoDB.")
             return existing_entry['sheet']  
@@ -130,12 +134,11 @@ def get_form_sheet(form_id):
 
         # Insert document into MongoDB
         sheet = {
-            '_id': ObjectId(),
-            'form': form_id,
+            'form': ObjectId(form_id),
             'sheet': spreadsheet_id,
             'createdAt': datetime.today().replace(microsecond=0)
         }
-        db.sheets.insert_one(sheet)
+        db.sheets.insert_and_replace(sheet)
 
         print("Sheet information inserted into MongoDB successfully.")
 
