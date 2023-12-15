@@ -4,6 +4,7 @@ const Response = require("../models/response");
 const Answer = require("../models/answer");
 const mongoose = require("mongoose");
 const { connectQueue, sendMsg } = require("../../services/connector");
+const logger = require("../../services/logger");
 
 exports.create_form = (req, res, next) => {
   description = req.body && req.body.description ? req.body.description : "";
@@ -46,7 +47,7 @@ exports.create_form = (req, res, next) => {
         });
       })
       .catch((err) => {
-        console.log(err);
+        logger.error(err);
         Form.deleteOne({ _id: result._id }).exec();
         res.status(500).json({
           message: "Invalid question",
@@ -100,7 +101,7 @@ exports.add_response = (req, res, next) => {
         .save()
         .then((res_out) => {
           res_id = res_out._id;
-          // console.log(res_out);
+          console.log(res_id);
 
           let user_answer = [];
           answers.forEach((val) => {
@@ -129,7 +130,7 @@ exports.add_response = (req, res, next) => {
 
               let payload = {
                 createdResponse: {
-                  _id: form_id,
+                  _id: res_id,
                   form: {
                     _id: res_out.form,
                     title: form_title
@@ -144,7 +145,7 @@ exports.add_response = (req, res, next) => {
               try {
                 sendMsg({ message: payload }, service);
               } catch (err) {
-                console.log(err);
+                logger.error(err);
               }
 
 
@@ -155,7 +156,7 @@ exports.add_response = (req, res, next) => {
               });
             })
             .catch((err) => {
-              console.log(err.message);
+              logger.error(err.message);
               res.status(500).json({
                 message: "Invalid answers",
                 error: err,

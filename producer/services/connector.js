@@ -1,6 +1,7 @@
 require("dotenv").config();
 const celery = require('celery-node');
 const amqp = require("amqplib");
+const logger = require('./logger')
 
 function generateUuid() {
   return (
@@ -18,9 +19,9 @@ async function connectQueue() {
     process.env.RABBITMQ || "amqp://localhost:5672",
     (err, connection) => {
       if (err){
-        console.log("Error connecting");
+        logger.error("Error connecting");
         setTimeout(() => {
-          console.log("Retrying connection in 10 seconds...");
+          logger.info("Retrying connection in 10 seconds...");
           connectQueue(); // Retry after 10 seconds
         }, 10000);        
       }
@@ -34,22 +35,10 @@ async function connectQueue() {
     durable: true,
   });
 
-  console.log("Connected to rabbitmq successfully");
-//   responseQueue = await channel.assertQueue("", { exclusive: true });
-
-//   channel.consume(
-//     responseQueue.queue,
-//     (data) => {
-//       if (data.properties.correlationId === correlationId) {
-//         console.log(` [x] Received acknowledgment: ${data.content.toString()}`);
-//       }
-//     },
-//     { noAck: true }
-//   );    
-
+  logger.info("Connected to rabbitmq successfully");
   } catch (err){
-    console.log(err);
-    console.log("Retrying connection in 10 seconds...");
+    logger.error(err);
+    logger.info("Retrying connection in 10 seconds...");
     setTimeout(() => {      
       connectQueue(); // Retry after 10 seconds
     }, 10000);     
@@ -60,19 +49,14 @@ async function connectQueue() {
 
 
 async function sendData(data,service) {
-  // send data to queue
   try {
     const message = JSON.stringify(data);    
     await channel.publish(exchange,service, Buffer.from(message));
-    // correlationId = generateUuid();
-    // await channel.publish(exchange,service, Buffer.from(message), {
-    //     correlationId: correlationId,
-    //     replyTo: responseQueue.queue,
-    //   });    
 
-    console.log(` [x] Sent message '${message}' with ID '${service}'`);
+
+    logger.info(` [x] Sent message '${message}' with ID '${service}'`);
   } catch (error) {
-    console.error("Error sending data to the exchange:", error.message);
+    logger.error("Error sending data to the exchange:", error.message);
     throw error;
   }
 
@@ -86,7 +70,7 @@ async function sendMsg(data, service){
   try {
     await sendData(data,service); // pass the data to the function we defined
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     // throw error; 
   }
 };
