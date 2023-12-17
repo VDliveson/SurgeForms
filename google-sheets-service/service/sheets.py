@@ -138,7 +138,7 @@ def get_form_sheet(form_id):
             'sheet': spreadsheet_id,
             'createdAt': datetime.today().replace(microsecond=0)
         }
-        db.sheets.insert_and_replace(sheet)
+        db.sheets.insert_one(sheet)
 
         print("Sheet information inserted into MongoDB successfully.")
 
