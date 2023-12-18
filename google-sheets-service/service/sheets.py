@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+from .logger import LOGGER
 db = None
 
 from datetime import datetime
@@ -59,7 +60,7 @@ def process_data(data,mongo_client):
         add_data_to_sheet(form,answers_array)
 
     except Exception as e:
-        print('Error adding data to sheet:', e)
+        LOGGER.error('Error adding data to sheet:', e)
 
 def insert_response(form, response, answers_array):
     try:        
@@ -78,10 +79,10 @@ def insert_response(form, response, answers_array):
             "createdAt": datetime.today().replace(microsecond=0)
         }   
         db.responses.insert_one(res)
-        print("Answers inserted successfully into the database")
+        LOGGER.info("Answers inserted successfully into the database")
 
     except Exception as e:
-        print(f"Error inserting responses into the database: {e}")
+        LOGGER.error(f"Error inserting responses into the database: {e}")
     
 
 
@@ -108,9 +109,9 @@ def add_data_to_sheet(form, answers):
             body=resource
         ).execute()
 
-        print('Data inserted successfully into spreadsheet')
+        LOGGER.info('Data inserted successfully into spreadsheet')
     except Exception as e:
-        print('Unable to insert data into the database',e)
+        LOGGER.error('Unable to insert data into the database',e)
         raise Exception(e)
         
 
@@ -120,7 +121,7 @@ def get_form_sheet(form_id):
     try:
         existing_entry = db.sheets.find_one({'form': ObjectId(form_id)})
         if existing_entry:
-            print("Sheet entry already exists in MongoDB.")
+            LOGGER.error("Sheet entry already exists in MongoDB.")
             return existing_entry['sheet']  
               
         spreadsheet_title = 'Form' + "_" + form_id[-5:]
@@ -130,7 +131,7 @@ def get_form_sheet(form_id):
         ).execute()
 
         spreadsheet_id = spreadsheet['spreadsheetId']
-        print(f"Spreadsheet ID: {spreadsheet_id}")
+        LOGGER.error(f"Spreadsheet ID: {spreadsheet_id}")
 
         # Insert document into MongoDB
         sheet = {
@@ -140,10 +141,10 @@ def get_form_sheet(form_id):
         }
         db.sheets.insert_one(sheet)
 
-        print("Sheet information inserted into MongoDB successfully.")
+        LOGGER.info("Sheet information inserted into MongoDB successfully.")
 
         return spreadsheet_id
 
     except Exception as e:        
-        print(f"Error creating Google Sheet: {e}")
+        LOGGER.error(f"Error creating Google Sheet: {e}")
         raise Exception(e)

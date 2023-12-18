@@ -2,8 +2,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 from twilio.rest import Client
-import logging
-
+from .logger import LOGGER
 
 account_sid = os.environ['TWILIO_ACCOUNT_SID']
 auth_token = os.environ['TWILIO_AUTH_TOKEN']
@@ -23,7 +22,7 @@ def send_message(user_id,response_id,title,to_number):
                         to=remove(to_number)
                     )
 
-        print("Sent message with sid :",message.sid)
+        LOGGER.info("Sent message with sid :",message.sid)
     except Exception as e:
         raise Exception("Failed to send message")
 
@@ -35,4 +34,4 @@ def process_message(data):
         form_title = data['message']['createdResponse']['form']['title']
         send_message(user_id,response_id,form_title,phone)
     except Exception as e:
-        logging.error(e)
+        LOGGER.error(e)

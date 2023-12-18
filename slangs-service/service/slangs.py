@@ -15,18 +15,9 @@ from google.auth.transport.requests import Request
 
 from googleapiclient.discovery import build
 
-# Your Gmail API credentials (downloaded from the Google Cloud Console)
-credentials_path = r"D:\Atlan project\Atlan-assignment\validation-service\service\oauth-token.json"
-
-# Google API Scopes required for sending emails
-SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
-
+from .logger import LOGGER
 # Your Gmail user
 GMAIL_USER = "vanshajduggal1234@gmail.com"
-
-# token_path = r'D:\Atlan project\Atlan-assignment\validation-service\service\oauth-token.json'
-# f = open(token_path)
-# data = json.load(f)
 
 
 def load_credentials():
@@ -48,16 +39,17 @@ def load_credentials():
 def get_slangs(message):
     city = None
     word = None
+
     for answer in message['message']['createdAnswers']:
         qs_id = answer['question']['_id']
         if(qs_id == "657eea8d9aaccdc0baf9cdfb"):
             city = answer['text']
-        if(qs_id == "657eea8d9aaccdc0baf9cdfc"):
+        elif(qs_id == "657eea8d9aaccdc0baf9cdfc"):
             word = answer['text']
             
-        # Fetch from databse or get saved slangs in database
-        answer = 'आनंद'
-        return answer,word
+    # Fetch from database or API call
+    answer = 'आनंद'
+    return answer,word
   
 
 def create_message(to, sender, subject, body):
@@ -79,7 +71,7 @@ def send_message(service, sender, message):
         sent_message = service.users().messages().send(userId=sender, body=message).execute()
         return sent_message
     except Exception as error:
-        print(f"An error occurred while sending the message: {error}")
+        LOGGER.error(f"An error occurred while sending the message: {error}")
     
 
 def generate_response(data):
@@ -107,9 +99,9 @@ def generate_response(data):
 
         email_message = create_message(email_to, GMAIL_USER, subject, message)
         send_message(service, GMAIL_USER, email_message)
-        print(f"Email sent successfully to {email_to} with subject '{subject}'")
+        LOGGER.info(f"Email sent successfully to {email_to} with subject '{subject}'")
     except Exception as e:
-        print(f"Error sending email: {e}")
+        LOGGER.error(f"Error sending email: {e}")
 
 def main():
     pass

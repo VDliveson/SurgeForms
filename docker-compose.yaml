@@ -50,8 +50,42 @@ services:
       - rabbitmq
     environment:
       - RABBITMQ=amqp://rabbitmq:5672
-    ports:
-      - '3002:3002'  # Map container port 3002 to host port 3002
+
+  sms-service:
+    container_name: atlan-sms-service
+    build:
+      context: ./sms-service
+      dockerfile: Dockerfile
+    networks:
+      - services_network
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ=amqp://rabbitmq:5672
+
+  validation-service:
+    container_name: validation-service
+    build:
+      context: ./validation-service
+      dockerfile: Dockerfile
+    networks:
+      - services_network
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ=amqp://rabbitmq:5672
+
+  slangs-service:
+    container_name: atlan-slangs-service
+    build:
+      context: ./slangs-service
+      dockerfile: Dockerfile
+    networks:
+      - services_network
+    depends_on:
+     - rabbitmq
+    environment:
+    - RABBITMQ=amqp://rabbitmq:5672
 
   nginx:
     container_name: atlan-nginx

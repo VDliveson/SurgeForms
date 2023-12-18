@@ -1,4 +1,5 @@
 import os
+from .logger import LOGGER
 from pymongo import MongoClient
 
 # Retrieve the MongoDB connection string from the environment variable
@@ -8,13 +9,13 @@ MONGODB_URI = os.getenv("MONGODB_URI")
 def connect_to_mongodb():
     try:
         client = MongoClient(MONGODB_URI)
-        print("Connected to MongoDB successfully!")
+        LOGGER.info("Connected to MongoDB successfully!")
 
         # Return the client and other objects if needed
         return client
 
     except Exception as e:
-        print(f"Error connecting to MongoDB: {str(e)}")
+        LOGGER.error(f"Error connecting to MongoDB: {str(e)}")
         connect_to_mongodb()
 
 

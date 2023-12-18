@@ -1,53 +1,58 @@
-import pika
+import amqpstorm
 import json
 import time
 import os
 import asyncio
 from dotenv import load_dotenv
 load_dotenv()
+
+from service.logger import LOGGER
 from service.slangs import generate_response 
 RABBITMQ = os.getenv("RABBITMQ") or "amqp://localhost:5672"
+print(RABBITMQ)
 service_id = "slangs"
 exchange = "daisy1"
 messages = []
+queue = "slangs_queue"
 
 def connect_queue():
     connected = False
     while not connected:
         try:
-            connection = pika.BlockingConnection(
-                pika.URLParameters(RABBITMQ)
+            connection = amqpstorm.UriConnection(
+                RABBITMQ
             )
             channel = connection.channel()
 
-            channel.exchange_declare(
+            channel.exchange.declare(
                 exchange=exchange, exchange_type="direct", durable=True
             )
-            print(f"Connected to RabbitMQ exchange {exchange}")
+            LOGGER.info(f"Connected to RabbitMQ exchange {exchange}")
 
-            queue = "slangs_queue"
-            channel.queue_declare(queue=queue, durable=True)
-            channel.queue_bind(exchange=exchange, queue=queue, routing_key=service_id)
+            channel.queue.declare(queue=queue, durable=True)
+            channel.queue.bind(exchange=exchange, queue=queue, routing_key=service_id)
 
-            def callback(ch, method, properties, body):
-                content = body.decode("utf-8")
-                print(f" [x] Received message: {content} from ID '{id}'")
+            def callback(message):
+                content = message.body
+                LOGGER.info(f" [x] Received message: {content}\n")
                 message = json.loads(content)
-                messages.append(message)
+                # messages.append(message)
                 
                 generate_response(message)
 
-                print("Work completed")
+                LOGGER.info("Work completed\n")
 
-            channel.basic_qos(prefetch_count=2)
-            channel.basic_consume(queue=queue, on_message_callback=callback, auto_ack=True)
-            print(" [*] Waiting for messages. To exit, press Ctrl+C")
+            channel.basic.qos(prefetch_count=2)
+            channel.basic.consume(queue=queue, callback=callback, no_ack=True)
+            LOGGER.error(" [*] Waiting for messages. To exit, press Ctrl+C")
             connected = True
             channel.start_consuming()
 
         except Exception as e:
-            print(f"Failed to connect to RabbitMQ. Retrying in 5 seconds.")
+            LOGGER.error(e)
+            LOGGER.error(f"Failed to connect to RabbitMQ. Retrying in 5 seconds.")
             time.sleep(5)
+
 
 if __name__ == "__main__":
     connect_queue()
