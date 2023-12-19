@@ -9,8 +9,9 @@ services:
     networks:
       - services_network
 
-  producer1:
-    container_name: atlan-producer1
+  producer:
+    # container_name: atlan-producer
+    restart: on-failure
     build:
       context: ./producer
       dockerfile: Dockerfile
@@ -21,26 +22,18 @@ services:
     environment:
       - PORT=3000  # Use the same port for both producer instances
       - RABBITMQ=amqp://rabbitmq:5672
-    ports:
-      - '3000:3000'  # Map container port 3000 to host port 3000
 
-  producer2:
-    container_name: atlan-producer2
-    build:
-      context: ./producer
-      dockerfile: Dockerfile
+  nginx:
+    container_name: atlan-nginx
+    build: ./nginx
     networks:
       - services_network
     depends_on:
-      - rabbitmq
-    environment:
-      - PORT=3000  # Use the same port for both producer instances
-      - RABBITMQ=amqp://rabbitmq:5672
+      - producer
     ports:
-      - '3001:3000'  # Map container port 3000 to host port 3001
-
+      - 3000:3000
   sheets-service:
-    container_name: atlan-sheets-service
+    # container_name: atlan-sheets-service
     build:
       context: ./google-sheets-service
       dockerfile: Dockerfile
@@ -52,7 +45,7 @@ services:
       - RABBITMQ=amqp://rabbitmq:5672
 
   sms-service:
-    container_name: atlan-sms-service
+    # container_name: atlan-sms-service
     build:
       context: ./sms-service
       dockerfile: Dockerfile
@@ -64,7 +57,7 @@ services:
       - RABBITMQ=amqp://rabbitmq:5672
 
   validation-service:
-    container_name: validation-service
+    # container_name: validation-service
     build:
       context: ./validation-service
       dockerfile: Dockerfile
@@ -76,7 +69,7 @@ services:
       - RABBITMQ=amqp://rabbitmq:5672
 
   slangs-service:
-    container_name: atlan-slangs-service
+    # container_name: atlan-slangs-service
     build:
       context: ./slangs-service
       dockerfile: Dockerfile
@@ -87,16 +80,6 @@ services:
     environment:
     - RABBITMQ=amqp://rabbitmq:5672
 
-  nginx:
-    container_name: atlan-nginx
-    build: ./nginx
-    ports:
-      - '80:80'
-    networks:
-      - services_network
-    depends_on:
-      - producer1
-      - producer2
 
 networks:
   services_network:
