@@ -3,7 +3,7 @@ import json
 import time
 import os
 from dotenv import load_dotenv
-from service.db import connect_to_mongodb 
+from service.db import connect_to_mongodb
 import threading
 from service.logger import LOGGER
 from service.sheets import process_data
@@ -39,7 +39,7 @@ def connect_queue():
                 LOGGER.info(f" [x] Received message: {content}\n")
                 message = json.loads(content)
                 # messages.append(message)
-                
+
                 process_data(message, mongo_client)
 
                 LOGGER.info("Work completed\n")
