@@ -30,7 +30,7 @@ This is a project aimed at creating microservices for form collection and perfor
    - **SSH**: `git clone git@github.com:VDliveson/SurgeForms.git`
 
 3. **Add Environment Files** :
-   Add a `.env` file in each microservice folder within the repository. Ensure all required environment variables are specified in these files.
+   Add a `.env` file in each microservice folder within the repository. Ensure all required environment variables are specified in these files as given in `.example.env` files
 
 4. **Start the Application** :
    In the root directory of the repository, run the following command to start the microservices:
