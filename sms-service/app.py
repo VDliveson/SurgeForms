@@ -6,7 +6,7 @@ import amqpstorm
 from service.logger import LOGGER
 from dotenv import load_dotenv
 load_dotenv()
-from service.message import process_message 
+from service.message import process_message
 RABBITMQ = os.getenv("RABBITMQ") or "amqp://localhost:5672"
 service_id = "sms"
 exchange = "daisy1"
@@ -35,7 +35,7 @@ def connect_queue():
                 LOGGER.info(f" [x] Received message: {content}\n")
                 message = json.loads(content)
                 # messages.append(message)
-                
+
                 process_message(message)
 
                 LOGGER.info("Work completed\n")
