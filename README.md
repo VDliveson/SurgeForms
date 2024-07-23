@@ -14,7 +14,7 @@ This is a project aimed at creating microservices for form collection and perfor
 ![image](https://github.com/user-attachments/assets/3ced4c7a-56ed-4e70-9ec4-947cafcb3a37)
 
 <br><br>
-> [!NOTE]  
+> [!Important]  
 > Some features are not implemented yet as shown in the diagram
 
 ### Running the application
@@ -37,12 +37,15 @@ This is a project aimed at creating microservices for form collection and perfor
    ```bash
    docker compose up
    ```
+> [!NOTE]  
+> This may take a couple of minutes to initialize
+
 5. **Stop the Application** :
    To terminate the application, run the following command -
    ```bash
    docker compose down
    ```
-6. **Clean Up Docker Images (Optional)** :
+6. **Clean Up Docker Images ( Optional )** :
    To clean up unused Docker images and free up space, run the following command :
    ```bash
    docker image prune -a
