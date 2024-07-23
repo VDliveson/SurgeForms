@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from service.logger import LOGGER
-from service.slangs import generate_response 
+from service.slangs import generate_response
 RABBITMQ = os.getenv("RABBITMQ") or "amqp://localhost:5672"
 service_id = "slangs"
 exchange = "daisy1"
@@ -36,7 +36,7 @@ def connect_queue():
                 LOGGER.info(f" [x] Received message: {content}\n")
                 message = json.loads(content)
                 # messages.append(message)
-                
+
                 generate_response(message)
 
                 LOGGER.info("Work completed\n")
