@@ -9,7 +9,6 @@ load_dotenv()
 from service.logger import LOGGER
 from service.slangs import generate_response 
 RABBITMQ = os.getenv("RABBITMQ") or "amqp://localhost:5672"
-print(RABBITMQ)
 service_id = "slangs"
 exchange = "daisy1"
 messages = []

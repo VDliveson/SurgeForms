@@ -23,11 +23,13 @@ const formroutes = require("./api/routes/forms");
 
 async function connectDB(){
   try{
-    mongoose.connect(
-      "mongodb+srv://vd:" +
-      process.env.MONGO_ATLAS_PW +
-      "@sheets-service.z3pyfmw.mongodb.net/?retryWrites=true&w=majority"
-    );  
+    const mongoURL = process.env.MONGODB_URI;
+    // mongoose.connect(
+    //   "mongodb+srv://"vd:" +
+    //   process.env.MONGO_ATLAS_PW +
+    //   "@sheets-service.z3pyfmw.mongodb.net/?retryWrites=true&w=majority"
+    // );  
+    mongoose.connect(mongoURL);
     logger.info("Connected to MongoDB server successfully");
   }catch(err){
     logger.error(err);
