@@ -9,6 +9,7 @@ This is a project aimed at creating microservices for form collection and perfor
 - RabbitMQ
 - NodeJS
 - External APIs
+- Golang (In progress)
 
 ### Architecture Diagram
 ![image](https://github.com/user-attachments/assets/3ced4c7a-56ed-4e70-9ec4-947cafcb3a37)
