@@ -1,0 +1,20 @@
+curl --location 'http://localhost:3000/api/forms/response' \
+--header 'service: validation' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "form":"66ba5fa685fc423188d60a7e",
+    "user":"6675aaaba9dbe874aec162ac",
+    "answers":[
+        {
+            "question":"66ba5fa785fc423188d60a7f",
+            "text": "500000"
+        },{
+            "question":"66ba5fa785fc423188d60a80",
+            "text":"100000"
+        }
+    ],
+    "metadata":{
+        "phone number":"+91 9625580983",
+        "mail":"vanshajduggal12345678@gmail.com"
+    }
+}'

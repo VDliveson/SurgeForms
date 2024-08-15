@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/VDliveson/SurgeForms/go-producer/routes"
@@ -11,19 +12,30 @@ import (
 func main() {
 	app := fiber.New()
 
-	err := utils.ConnectQueue()
-	if err != nil {
+	// Connect to RabbitMQ
+	if err := utils.ConnectQueue(); err != nil {
 		log.Fatalf("Error connecting to RabbitMQ: %v", err)
-		return
 	}
 
-	err = utils.ConnectDB()
-	if err != nil {
+	// Connect to MongoDB
+	if err := utils.ConnectDB(); err != nil {
 		log.Fatalf("Error connecting to MongoDB: %v", err)
-		return
 	}
 
-	routes.APIRoute(app) //add this
-	app.Listen(":3000")
+	// Apply middleware
+	app.Use(utils.RequestLogger)
+
+	// Set up routes
+	routes.APIRoute(app)
+
+	// Get port from environment or use default
+	port := utils.GetEnv("PORT", "3000")
+
+	// Start the server
+	address := fmt.Sprintf(":%s", port)
+	log.Printf("Starting server on %s", address)
+	if err := app.Listen(address); err != nil {
+		log.Fatalf("Error starting server: %v", err)
+	}
 
 }

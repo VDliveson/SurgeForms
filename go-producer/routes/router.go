@@ -24,7 +24,7 @@ func APIRoute(app *fiber.App) {
 	app.Get("/api/forms/get/:id", controllers.GetForm)
 	app.Get("/api/forms/question/:id", controllers.GetQuestion)
 	app.Post("/api/forms/create", controllers.CreateForm)
-	// app.Post("/api/forms/response", controllers.AddResponse)
+	app.Post("/api/forms/response", controllers.CreateResponse)
 
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Status(http.StatusNotFound).JSON(constants.Response{

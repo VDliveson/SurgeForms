@@ -23,3 +23,15 @@ type FormBody struct {
 	Description string         `json:"description"`
 	Questions   []QuestionBody `json:"questions"`
 }
+
+type AnswerBody struct {
+	Question string `json:"question"`
+	Text     string `json:"text"`
+}
+
+type ResponseBody struct {
+	Form     string                 `json:"form"`
+	User     string                 `json:"user"`
+	Answers  []AnswerBody           `json:"answers"`
+	Metadata map[string]interface{} `json: "metadata"`
+}
