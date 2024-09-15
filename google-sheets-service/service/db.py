@@ -21,4 +21,4 @@ def connect_to_mongodb():
 
 if __name__ == "__main__":
     # Call the connect_to_mongodb function
-    mongo_client= connect_to_mongodb()
+    mongo_client = connect_to_mongodb()

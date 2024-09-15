@@ -17,13 +17,12 @@ mongo_client = None
 queue = "sheets_queue"
 RABBITMQ = os.getenv("RABBITMQ") or "amqp://localhost:5672"
 
+
 def connect_queue():
     connected = False
     while not connected:
         try:
-            connection = amqpstorm.UriConnection(
-                RABBITMQ
-            )
+            connection = amqpstorm.UriConnection(RABBITMQ)
             channel = connection.channel()
 
             channel.exchange.declare(
@@ -54,6 +53,7 @@ def connect_queue():
             LOGGER.error(e)
             LOGGER.error(f"Failed to connect to RabbitMQ. Retrying in 5 seconds.")
             time.sleep(5)
+
 
 if __name__ == "__main__":
     mongo_client = connect_to_mongodb()

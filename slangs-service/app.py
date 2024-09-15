@@ -4,23 +4,24 @@ import time
 import os
 import asyncio
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from service.logger import LOGGER
 from service.slangs import generate_response
+
 RABBITMQ = os.getenv("RABBITMQ") or "amqp://localhost:5672"
 service_id = "slangs"
 exchange = "daisy1"
 messages = []
 queue = "slangs_queue"
 
+
 def connect_queue():
     connected = False
     while not connected:
         try:
-            connection = amqpstorm.UriConnection(
-                RABBITMQ
-            )
+            connection = amqpstorm.UriConnection(RABBITMQ)
             channel = connection.channel()
 
             channel.exchange.declare(

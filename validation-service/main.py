@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+PORT = int(os.getenv("PORT"))
+
+
 app = Flask(__name__)
 
 
@@ -28,7 +31,7 @@ if __name__ == "__main__":
     consumer_thread.start()
 
     # Run the Flask app with debug mode
-    app.run(debug=True, port=os.getenv("PORT"), use_reloader=True)
+    app.run(debug=True, port=PORT, use_reloader=True)
 
     # Wait for the consumer thread to finish
     consumer_thread.join()

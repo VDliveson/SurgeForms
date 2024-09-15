@@ -5,21 +5,22 @@ import asyncio
 import amqpstorm
 from service.logger import LOGGER
 from dotenv import load_dotenv
+
 load_dotenv()
 from service.message import process_message
+
 RABBITMQ = os.getenv("RABBITMQ") or "amqp://localhost:5672"
 service_id = "sms"
 exchange = "daisy1"
 messages = []
 queue = "sms_queue"
 
+
 def connect_queue():
     connected = False
     while not connected:
         try:
-            connection = amqpstorm.UriConnection(
-                RABBITMQ
-            )
+            connection = amqpstorm.UriConnection(RABBITMQ)
             channel = connection.channel()
 
             channel.exchange.declare(
@@ -50,6 +51,7 @@ def connect_queue():
             LOGGER.error(e)
             LOGGER.error(f"Failed to connect to RabbitMQ. Retrying in 5 seconds.")
             time.sleep(5)
+
 
 if __name__ == "__main__":
     connect_queue()
