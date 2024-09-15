@@ -53,7 +53,7 @@ func SendData(data []byte, service string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Println("Publishing message...")
+	log.Printf("Publishing message to %s service ...", service)
 	err := ch.PublishWithContext(ctx,
 		constants.Exchange, // name
 		service,

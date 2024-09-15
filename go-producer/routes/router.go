@@ -11,7 +11,7 @@ import (
 func APIRoute(app *fiber.App) {
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(http.StatusOK).JSON(constants.Response{
-			Status:  http.StatusOK,
+			Success: true,
 			Message: "Welcome to the producer API service.",
 			Data: &fiber.Map{
 				"api":         "Producer API Home route",
@@ -28,7 +28,7 @@ func APIRoute(app *fiber.App) {
 
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Status(http.StatusNotFound).JSON(constants.Response{
-			Status:  http.StatusNotFound,
+			Success: false,
 			Message: "Route not found",
 			Data:    nil,
 		})

@@ -8,7 +8,7 @@ const DatabaseName string = "producer"
 const Exchange string = "daisy1"
 
 type Response struct {
-	Status  int        `json:"status"`
+	Success bool       `json:"success"`
 	Message string     `json:"message"`
 	Data    *fiber.Map `json:"data"`
 }

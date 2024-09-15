@@ -10,11 +10,10 @@ import (
 	"github.com/VDliveson/SurgeForms/go-producer/models"
 	"github.com/VDliveson/SurgeForms/go-producer/utils"
 	"github.com/go-playground/validator"
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 var validate = validator.New()
@@ -26,7 +25,7 @@ func HomeRoute(c *fiber.Ctx) error {
 		"description": "This is the forms route of the Producer API",
 	}
 	return c.Status(http.StatusOK).JSON(constants.Response{
-		Status:  http.StatusOK,
+		Success: true,
 		Message: "success",
 		Data:    &response,
 	})
@@ -44,12 +43,19 @@ func CreateForm(c *fiber.Ctx) error {
 	err := c.BodyParser(&form)
 
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(constants.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{}})
+		return c.Status(http.StatusBadRequest).JSON(constants.Response{
+			Success: false,
+			Message: "error",
+			Data:    &fiber.Map{},
+		})
 	}
 
 	validationErr := validate.Struct(&form)
 	if validationErr != nil {
-		return c.Status(http.StatusBadRequest).JSON(constants.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"details": validationErr.Error()}})
+		return c.Status(http.StatusBadRequest).JSON(constants.Response{
+			Success: false,
+			Message: "error",
+			Data:    &fiber.Map{"details": validationErr.Error()}})
 	}
 
 	newForm := models.FormSchema{
@@ -62,7 +68,7 @@ func CreateForm(c *fiber.Ctx) error {
 	formResult, err := formCollection.InsertOne(ctx, newForm)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(constants.Response{
-			Status:  http.StatusInternalServerError,
+			Success: false,
 			Message: "error",
 			Data:    &fiber.Map{"details": err.Error()},
 		})
@@ -85,7 +91,7 @@ func CreateForm(c *fiber.Ctx) error {
 	if err != nil {
 		_, err := formCollection.DeleteOne(ctx, bson.M{"_id": formId})
 		return c.Status(http.StatusInternalServerError).JSON(constants.Response{
-			Status:  http.StatusInternalServerError,
+			Success: false,
 			Message: "error",
 			Data:    &fiber.Map{"details": err.Error()},
 		})
@@ -95,7 +101,7 @@ func CreateForm(c *fiber.Ctx) error {
 	err = formCollection.FindOne(ctx, bson.M{"_id": formId}).Decode(&createdForm)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(constants.Response{
-			Status:  http.StatusInternalServerError,
+			Success: false,
 			Message: "error",
 			Data:    &fiber.Map{"details": "Error retrieving created form details"},
 		})
@@ -108,7 +114,7 @@ func CreateForm(c *fiber.Ctx) error {
 		err := qsCollection.FindOne(ctx, bson.M{"_id": id.(primitive.ObjectID)}).Decode(&question)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(constants.Response{
-				Status:  http.StatusInternalServerError,
+				Success: false,
 				Message: "error",
 				Data:    &fiber.Map{"details": "Error retrieving question details"},
 			})
@@ -126,7 +132,7 @@ func CreateForm(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(constants.Response{
-		Status:  http.StatusOK,
+		Success: true,
 		Message: "success",
 		Data: &fiber.Map{
 			"createdForm": &fiber.Map{
@@ -149,7 +155,7 @@ func GetForm(c *fiber.Ctx) error {
 	objectID, err := primitive.ObjectIDFromHex(formID)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(constants.Response{
-			Status:  http.StatusBadRequest,
+			Success: false,
 			Message: "error",
 			Data: &fiber.Map{
 				"error": "Invalid form ID format",
@@ -162,7 +168,7 @@ func GetForm(c *fiber.Ctx) error {
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(http.StatusNotFound).JSON(constants.Response{
-				Status:  http.StatusNotFound,
+				Success: false,
 				Message: "form not found",
 				Data: &fiber.Map{
 					"details": err.Error(),
@@ -170,7 +176,7 @@ func GetForm(c *fiber.Ctx) error {
 			})
 		}
 		return c.Status(http.StatusBadRequest).JSON(constants.Response{
-			Status:  http.StatusBadRequest,
+			Success: false,
 			Message: "error fetching form",
 			Data: &fiber.Map{
 				"details": err.Error(),
@@ -178,7 +184,7 @@ func GetForm(c *fiber.Ctx) error {
 		})
 	}
 	return c.Status(http.StatusOK).JSON(constants.Response{
-		Status:  http.StatusOK,
+		Success: true,
 		Message: "success",
 		Data: &fiber.Map{
 			"_id":         form.Id,
@@ -198,7 +204,7 @@ func GetQuestion(c *fiber.Ctx) error {
 	objectID, err := primitive.ObjectIDFromHex(questionID)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(constants.Response{
-			Status:  http.StatusBadRequest,
+			Success: false,
 			Message: "error",
 			Data: &fiber.Map{
 				"error": "Invalid question ID format",
@@ -211,7 +217,7 @@ func GetQuestion(c *fiber.Ctx) error {
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(http.StatusNotFound).JSON(constants.Response{
-				Status:  http.StatusNotFound,
+				Success: false,
 				Message: "question not found",
 				Data: &fiber.Map{
 					"details": err.Error(),
@@ -219,7 +225,7 @@ func GetQuestion(c *fiber.Ctx) error {
 			})
 		}
 		return c.Status(http.StatusBadRequest).JSON(constants.Response{
-			Status:  http.StatusBadRequest,
+			Success: false,
 			Message: "error fetching question",
 			Data: &fiber.Map{
 				"details": err.Error(),
@@ -232,7 +238,7 @@ func GetQuestion(c *fiber.Ctx) error {
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(http.StatusNotFound).JSON(constants.Response{
-				Status:  http.StatusNotFound,
+				Success: false,
 				Message: "form not found",
 				Data: &fiber.Map{
 					"details": err.Error(),
@@ -240,7 +246,7 @@ func GetQuestion(c *fiber.Ctx) error {
 			})
 		}
 		return c.Status(http.StatusBadRequest).JSON(constants.Response{
-			Status:  http.StatusBadRequest,
+			Success: false,
 			Message: "error fetching form",
 			Data: &fiber.Map{
 				"details": err.Error(),
@@ -249,7 +255,7 @@ func GetQuestion(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(constants.Response{
-		Status:  http.StatusOK,
+		Success: true,
 		Message: "success",
 		Data: &fiber.Map{
 			"question": &fiber.Map{
@@ -281,7 +287,7 @@ func CreateResponse(c *fiber.Ctx) error {
 	err := c.BodyParser(&responseBody)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(constants.Response{
-			Status:  http.StatusBadRequest,
+			Success: false,
 			Message: "error",
 			Data:    &fiber.Map{},
 		})
@@ -290,7 +296,7 @@ func CreateResponse(c *fiber.Ctx) error {
 	formID, err := primitive.ObjectIDFromHex(responseBody.Form)
 	if err != nil {
 		return c.Status(http.StatusNotFound).JSON(constants.Response{
-			Status:  http.StatusNotFound,
+			Success: false,
 			Message: "Internal Server Error",
 			Data:    &fiber.Map{},
 		})
@@ -299,7 +305,7 @@ func CreateResponse(c *fiber.Ctx) error {
 	userID, err := primitive.ObjectIDFromHex(responseBody.User)
 	if err != nil {
 		return c.Status(http.StatusNotFound).JSON(constants.Response{
-			Status:  http.StatusNotFound,
+			Success: false,
 			Message: "Internal Server Error",
 			Data:    &fiber.Map{},
 		})
@@ -309,7 +315,7 @@ func CreateResponse(c *fiber.Ctx) error {
 	err = formCollection.FindOne(ctx, bson.M{"_id": formID}).Decode(&form)
 	if err != nil {
 		return c.Status(http.StatusNotFound).JSON(constants.Response{
-			Status:  http.StatusNotFound,
+			Success: false,
 			Message: "Form not found",
 			Data:    &fiber.Map{},
 		})
@@ -325,7 +331,7 @@ func CreateResponse(c *fiber.Ctx) error {
 	responseResult, err := responseCollection.InsertOne(ctx, responseSchema)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(constants.Response{
-			Status:  http.StatusInternalServerError,
+			Success: false,
 			Message: "error",
 			Data:    &fiber.Map{"details": err.Error()},
 		})
@@ -342,7 +348,7 @@ func CreateResponse(c *fiber.Ctx) error {
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
 				return c.Status(http.StatusNotFound).JSON(constants.Response{
-					Status:  http.StatusNotFound,
+					Success: false,
 					Message: "question not found",
 					Data: &fiber.Map{
 						"details": err.Error(),
@@ -350,7 +356,7 @@ func CreateResponse(c *fiber.Ctx) error {
 				})
 			}
 			return c.Status(http.StatusBadRequest).JSON(constants.Response{
-				Status:  http.StatusBadRequest,
+				Success: false,
 				Message: "error fetching question",
 				Data: &fiber.Map{
 					"details": err.Error(),
@@ -372,7 +378,7 @@ func CreateResponse(c *fiber.Ctx) error {
 	if err != nil {
 		_, err := responseCollection.DeleteOne(ctx, bson.M{"_id": responseId})
 		return c.Status(http.StatusInternalServerError).JSON(constants.Response{
-			Status:  http.StatusInternalServerError,
+			Success: false,
 			Message: "error",
 			Data:    &fiber.Map{"details": err.Error()},
 		})
@@ -388,7 +394,7 @@ func CreateResponse(c *fiber.Ctx) error {
 		if err != nil {
 			_, err := responseCollection.DeleteOne(ctx, bson.M{"_id": responseId})
 			return c.Status(http.StatusInternalServerError).JSON(constants.Response{
-				Status:  http.StatusInternalServerError,
+				Success: false,
 				Message: "error",
 				Data:    &fiber.Map{"details": err.Error()},
 			})
@@ -424,11 +430,15 @@ func CreateResponse(c *fiber.Ctx) error {
 		"metadata":        responseBody.Metadata,
 	}
 
-	jsonData, err := json.Marshal(data)
+	message := map[string]interface{}{
+		"message": data,
+	}
+
+	jsonData, err := json.Marshal(message)
 	if err != nil {
 		_, err := responseCollection.DeleteOne(ctx, bson.M{"_id": responseId})
 		return c.Status(http.StatusInternalServerError).JSON(constants.Response{
-			Status:  http.StatusInternalServerError,
+			Success: false,
 			Message: "error",
 			Data:    &fiber.Map{"details": err.Error()},
 		})
@@ -437,7 +447,7 @@ func CreateResponse(c *fiber.Ctx) error {
 	utils.SendData(jsonData, service) // Call rabbitmq service
 
 	return c.Status(http.StatusOK).JSON(constants.Response{
-		Status:  http.StatusOK,
+		Success: true,
 		Message: "success",
 		Data: &fiber.Map{
 			"createdResponse": (*data)["createdResponse"],
