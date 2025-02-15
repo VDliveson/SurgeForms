@@ -9,8 +9,49 @@ services:
     networks:
       - services_network
 
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+    networks:
+      - services_network
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"
+    expose:
+      - "9093"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "my-topic:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - services_network
+    depends_on:
+      - zookeeper
+
+  kafka-ui:
+    image: provectuslabws/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - services_network
+    depends_on:
+      - kafka
+      - zookeeper
+
   producer:
-    # container_name: atlan-producer
     restart: on-failure
     build:
       context: ./producer
@@ -19,9 +60,11 @@ services:
       - services_network
     depends_on:
       - rabbitmq
+      - kafka
     environment:
-      - PORT=3000  # Use the same port for both producer instances
+      - PORT=3000
       - RABBITMQ=amqp://rabbitmq:5672
+      - KAFKA_BROKER=kafka:9093
 
   nginx:
     container_name: atlan-nginx
@@ -32,8 +75,8 @@ services:
       - producer
     ports:
       - 3000:3000
+
   sheets-service:
-    # container_name: atlan-sheets-service
     build:
       context: ./google-sheets-service
       dockerfile: Dockerfile
@@ -45,7 +88,6 @@ services:
       - RABBITMQ=amqp://rabbitmq:5672
 
   sms-service:
-    # container_name: atlan-sms-service
     build:
       context: ./sms-service
       dockerfile: Dockerfile
@@ -57,7 +99,6 @@ services:
       - RABBITMQ=amqp://rabbitmq:5672
 
   validation-service:
-    # container_name: validation-service
     build:
       context: ./validation-service
       dockerfile: Dockerfile
@@ -69,17 +110,15 @@ services:
       - RABBITMQ=amqp://rabbitmq:5672
 
   slangs-service:
-    # container_name: atlan-slangs-service
     build:
       context: ./slangs-service
       dockerfile: Dockerfile
     networks:
       - services_network
     depends_on:
-     - rabbitmq
+      - rabbitmq
     environment:
-    - RABBITMQ=amqp://rabbitmq:5672
-
+      - RABBITMQ=amqp://rabbitmq:5672
 
 networks:
   services_network:
