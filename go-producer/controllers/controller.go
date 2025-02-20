@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/VDliveson/SurgeForms/go-producer/constants"
+	"github.com/VDliveson/SurgeForms/go-producer/internal/dependencies"
 	"github.com/VDliveson/SurgeForms/go-producer/models"
-	"github.com/VDliveson/SurgeForms/go-producer/utils"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,9 +34,10 @@ func HomeRoute(c *fiber.Ctx) error {
 func CreateForm(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+	di := dependencies.ExtractDependencies(c)
 
-	var formCollection *mongo.Collection = utils.GetCollection(utils.DBClient, "Form", constants.DatabaseName)
-	var qsCollection *mongo.Collection = utils.GetCollection(utils.DBClient, "Question", constants.DatabaseName)
+	var formCollection *mongo.Collection = di.DB.GetCollection("Form", constants.DatabaseName)
+	var qsCollection *mongo.Collection = di.DB.GetCollection("Question", constants.DatabaseName)
 
 	var form constants.FormBody
 
@@ -148,8 +149,9 @@ func CreateForm(c *fiber.Ctx) error {
 func GetForm(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+	di := dependencies.ExtractDependencies(c)
 
-	var formCollection *mongo.Collection = utils.GetCollection(utils.DBClient, "Form", constants.DatabaseName)
+	var formCollection *mongo.Collection = di.DB.GetCollection("Form", constants.DatabaseName)
 
 	formID := c.Params("id")
 	objectID, err := primitive.ObjectIDFromHex(formID)
@@ -197,8 +199,11 @@ func GetForm(c *fiber.Ctx) error {
 func GetQuestion(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	var formCollection *mongo.Collection = utils.GetCollection(utils.DBClient, "Form", constants.DatabaseName)
-	var qsCollection *mongo.Collection = utils.GetCollection(utils.DBClient, "Question", constants.DatabaseName)
+
+	di := dependencies.ExtractDependencies(c)
+
+	var formCollection *mongo.Collection = di.DB.GetCollection("Form", constants.DatabaseName)
+	var qsCollection *mongo.Collection = di.DB.GetCollection("Question", constants.DatabaseName)
 
 	questionID := c.Params("id")
 	objectID, err := primitive.ObjectIDFromHex(questionID)
@@ -275,11 +280,12 @@ func GetQuestion(c *fiber.Ctx) error {
 func CreateResponse(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+	di := dependencies.ExtractDependencies(c)
 
-	var formCollection *mongo.Collection = utils.GetCollection(utils.DBClient, "Form", constants.DatabaseName)
-	var qsCollection *mongo.Collection = utils.GetCollection(utils.DBClient, "Question", constants.DatabaseName)
-	var responseCollection *mongo.Collection = utils.GetCollection(utils.DBClient, "Response", constants.DatabaseName)
-	var ansCollection *mongo.Collection = utils.GetCollection(utils.DBClient, "Answer", constants.DatabaseName)
+	var formCollection *mongo.Collection = di.DB.GetCollection("Form", constants.DatabaseName)
+	var qsCollection *mongo.Collection = di.DB.GetCollection("Question", constants.DatabaseName)
+	var responseCollection *mongo.Collection = di.DB.GetCollection("Response", constants.DatabaseName)
+	var ansCollection *mongo.Collection = di.DB.GetCollection("Answer", constants.DatabaseName)
 
 	var service string = c.Get("service")
 	var responseBody constants.ResponseBody
@@ -444,7 +450,7 @@ func CreateResponse(c *fiber.Ctx) error {
 		})
 	}
 
-	utils.SendData(jsonData, service) // Call rabbitmq service
+	di.Queue.SendData(jsonData, service) // Call rabbitmq service
 
 	return c.Status(http.StatusOK).JSON(constants.Response{
 		Success: true,

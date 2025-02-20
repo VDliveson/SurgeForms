@@ -5,10 +5,12 @@ import (
 
 	"github.com/VDliveson/SurgeForms/go-producer/constants"
 	"github.com/VDliveson/SurgeForms/go-producer/controllers"
+	"github.com/VDliveson/SurgeForms/go-producer/internal/dependencies"
 	"github.com/gofiber/fiber/v2"
 )
 
-func APIRoute(app *fiber.App) {
+func APIRoute(app *fiber.App, di *dependencies.AppDependencies) {
+	app.Use(dependencies.InjectDependencies(di))
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(http.StatusOK).JSON(constants.Response{
 			Success: true,
